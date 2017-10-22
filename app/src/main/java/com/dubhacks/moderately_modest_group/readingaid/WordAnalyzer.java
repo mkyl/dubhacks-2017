@@ -25,8 +25,12 @@ public class WordAnalyzer {
     private static Map<String, String> dictionary;
     static {
         dictionary = new HashMap<>();
-        dictionary.put("Word", "This is a definition");
-        dictionary.put("Not", "This is suprisingly hard to define");
+        dictionary.put("artist", "A person who produces paintings or drawings as a profession or hobby.");
+        dictionary.put("studio", "A room where an artist, photographer, etc. works.");
+        dictionary.put("spend", "To pass time");
+        dictionary.put("beside", "Near, next to");
+        dictionary.put("stroke", "To pet or touch an animal");
+        dictionary.put("moment", "The time");
     }
 
     public static Map<String, Double> getWordDifficulties(Context context) throws IOException {

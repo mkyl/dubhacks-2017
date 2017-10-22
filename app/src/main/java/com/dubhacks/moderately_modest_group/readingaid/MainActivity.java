@@ -190,7 +190,7 @@ public class MainActivity extends AppCompatActivity {
             readString(sentence, sentenceID);
         }
 
-        highlightAsSpoken(wholeDigitizedText, 150);
+        highlightAsSpoken(wholeDigitizedText, 160);
     }
 
     private int indexOfStartOfSentence(String sentence, List<List<String>> digitizedText) {
@@ -246,18 +246,33 @@ public class MainActivity extends AppCompatActivity {
                             return;
                     }
 
-                    if (mostDiff.get(word) != null) {
-                        readingString.append("[!]");
+                    Boolean difficult = false;
+                    if (mostDiff.get(word.toLowerCase()) != null) {
+                        difficult = true;
                     }
 
                     if(anotherCounter == currentWord) {
+                            if (difficult)
+                                readingString.append("<div style='color:red'>");
                             readingString.append("<b>");
                             readingString.append(word);
                             readingString.append("</b>");
                             readingString.append(" ");
+                            if (difficult)
+                                readingString.append("[ " + mostDiff.get(word.toLowerCase()) + " ] ");
+                            if (difficult)
+                                readingString.append("</div>");
                     } else {
+                        if (difficult)
+                            readingString.append("<div style='color:red'>");
+
                         readingString.append(word);
                         readingString.append(" ");
+
+                        if (difficult)
+                            readingString.append("[ " + mostDiff.get(word) + " ] ");
+                        if (difficult)
+                            readingString.append("</div>");
                     }
                     anotherCounter++;
                 }
