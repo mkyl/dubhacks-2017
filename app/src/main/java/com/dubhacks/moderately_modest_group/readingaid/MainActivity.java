@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
@@ -18,6 +19,8 @@ import android.view.MenuItem;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Locale;
+import java.util.UUID;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
 import static android.content.Intent.FLAG_GRANT_WRITE_URI_PERMISSION;
@@ -27,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     static final String TAG = "ReadingAid";
     static final int REQUEST_IMAGE_CAPTURE = 1;
     File tempFile;
+    TextToSpeech tts;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -42,6 +46,19 @@ public class MainActivity extends AppCompatActivity {
                 dispatchTakePictureIntent();
             }
         });
+
+        tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
+            @Override
+            public void onInit(int status) {
+                Log.e("TTS", "TextToSpeech.OnInitListener.onInit...");
+                MainActivity.this.readString("I like pie. Pie = 3.141");
+            }
+        });
+    }
+
+    public void readString(String string) {
+        tts.speak(string, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
+
     }
 
     @Override
