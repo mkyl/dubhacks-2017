@@ -29,6 +29,6 @@ dependencies {
     compile 'com.android.support.constraint:constraint-layout:1.0.2'
     compile 'com.android.support:design:26.+'
     compile 'org.apache.httpcomponents:httpclient-android:4.+'
-    compile files('C:/Users/rober/git/dubhacks-2017/Libs/commons-csv-1.5.jar')
+    compile files('../libs/commons-csv-1.5.jar')
     testCompile 'junit:junit:4.12'
 }
