@@ -218,6 +218,15 @@ public class MainActivity extends AppCompatActivity {
         int currentWord = 0;
         int wordCount = 0;
 
+        Map<String, Double> wordDifficulties = null;
+        try {
+            wordDifficulties = WordAnalyzer.getWordDifficulties(this);
+        } catch (Exception e) {
+            Log.e("ReadingAId", "" + e);
+        }
+
+        Map<String, String> mostDiff = WordAnalyzer.getNWords(wholeDigitizedText, wordDifficulties, 2);
+
         for(List<String> sentence : digitizedText) {
             wordCount += sentence.size();
         }
@@ -234,11 +243,15 @@ public class MainActivity extends AppCompatActivity {
                         currentSentenceID = null;
                     }
 
+                    if (mostDiff.get(word) != null) {
+                        readingString.append("[!]");
+                    }
+
                     if(anotherCounter == currentWord) {
-                        readingString.append("<b>");
-                        readingString.append(word);
-                        readingString.append("</b>");
-                        readingString.append(" ");
+                            readingString.append("<b>");
+                            readingString.append(word);
+                            readingString.append("</b>");
+                            readingString.append(" ");
                     } else {
                         readingString.append(word);
                         readingString.append(" ");
