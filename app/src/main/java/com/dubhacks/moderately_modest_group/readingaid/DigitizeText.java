@@ -10,7 +10,8 @@ import org.apache.http.client.utils.URIBuilder;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.util.EntityUtils;
-import org.json.JSONObject;
+import org.json.*;
+import java.util.*;
 
 /**
  * Created by maria on 10/21/2017.
@@ -58,6 +59,30 @@ public class DigitizeText {
         }
 
         throw new Exception("digitizeText method could not digitize text.");
+    }
+
+    public static List<List<String>> jsonToStringArray(JSONObject data) throws JSONException {
+        JSONArray regions = data.getJSONArray("regions");
+        List<List<String>> regionList = new ArrayList<>();
+
+        for (int i = 0; i < regions.length(); i++) {
+            List<String> wordList = new ArrayList<>();
+            JSONObject region = regions.getJSONObject(i);
+            JSONArray lines = region.getJSONArray("lines");
+            for (int j = 0; j < lines.length(); j++) {
+                JSONObject line = lines.getJSONObject(j);
+                JSONArray words = line.getJSONArray("words");
+                for (int k = 0; k < words.length(); k++) {
+                    JSONObject word = words.getJSONObject(k);
+                    String text = word.getString("text");
+                    wordList.add(text);
+                }
+            }
+
+            regionList.add(wordList);
+        }
+
+        return regionList;
     }
 }
 
