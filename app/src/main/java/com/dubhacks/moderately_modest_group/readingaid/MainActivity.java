@@ -192,7 +192,7 @@ public class MainActivity extends AppCompatActivity {
                     }
                     anotherCounter++;
                 }
-                readingString.append("\n \n \n");
+                readingString.append("<hr>");
             }
 
             this.runOnUiThread(new Runnable() {
