@@ -17,15 +17,13 @@ import org.json.JSONObject;
  */
 
 public class DigitizeText {
-    public static final String subscriptionKey = "13hc77781f7e4b19b5fcdd72a8df7156";
+    public static final String subscriptionKey = "b6dec940d6944d59bbe081ecab0def94";
     public static final String uriBase = "https://westcentralus.api.cognitive.microsoft.com/vision/v1.0/ocr";
+    // or this uriBase from Kayali? https://westus.api.cognitive.microsoft.com/vision/v1.0
 
     @SuppressWarnings("deprecation")
     public static JSONObject digitizeText(byte[] imageBytes) throws Exception {
         HttpClient httpClient = new DefaultHttpClient();
-        // NOTE: You must use the same location in your REST call as you used to obtain your subscription keys.
-        //   For example, if you obtained your subscription keys from westus, replace "westcentralus" in the
-        //   URL below with "westus".
         URIBuilder uriBuilder = new URIBuilder(uriBase);
 
         uriBuilder.setParameter("language", "unk");
@@ -39,11 +37,7 @@ public class DigitizeText {
         request.setHeader("Content-Type", "image/jpeg");
         request.setHeader("Ocp-Apim-Subscription-Key", subscriptionKey);
 
-        // Our request body.
-/*            MultipartEntity mpEntity = new MultipartEntity();
-        ContentBody cbFile = new FileBody(image, "image/jpeg");
-        mpEntity.addPart("image", cbFile);*/
-
+        // Request body.
         ByteArrayEntity byteEntity = new ByteArrayEntity(imageBytes);
         request.setEntity(byteEntity);
 
