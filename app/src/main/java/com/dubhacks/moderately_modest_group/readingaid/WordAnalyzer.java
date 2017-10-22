@@ -22,6 +22,13 @@ import java.util.Queue;
  */
 
 public class WordAnalyzer {
+    private static Map<String, String> dictionary;
+    static {
+        dictionary = new HashMap<>();
+        dictionary.put("Word", "This is a definition");
+        dictionary.put("Not", "This is suprisingly hard to define");
+    }
+
     public static Map<String, Double> getWordDifficulties(Context context) throws IOException {
         Map<String, Double> wordDifficulties = new HashMap<>();
         InputStream input = context.getResources().openRawResource(R.raw.worddifficulties);
@@ -38,7 +45,12 @@ public class WordAnalyzer {
             String word = record.get(0);
             Double ageOfAcquisition;
             try {
-                ageOfAcquisition = Double.parseDouble(record.get(1));
+                String ageString = record.get(i);
+                if (ageString != null) {
+                    ageOfAcquisition = Double.parseDouble(ageString);
+                } else {
+                    ageOfAcquisition = null;
+                }
             } catch (NumberFormatException e) {
                 ageOfAcquisition = null;
             }
@@ -64,7 +76,7 @@ public class WordAnalyzer {
 
         for (int i = 0; i < numberOfWords; i++) {
             String word = pq.remove().word;
-            definitions.put(word, "some definition of word " + word);
+            definitions.put(word, dictionary.get(word));
         }
 
         return definitions;
