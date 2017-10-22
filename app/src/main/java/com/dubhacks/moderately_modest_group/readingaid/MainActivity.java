@@ -6,6 +6,7 @@ import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.StrictMode;
+import android.os.SystemClock;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
@@ -14,6 +15,7 @@ import android.support.v4.content.FileProvider;
 import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.Html;
 import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.View;
@@ -67,9 +69,10 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 Log.e("TTS", "TextToSpeech.OnInitListener.onInit...");
-                // MainActivity.this.readString("I like pie. Pie = 3.141");
             }
         });
+
+        tts.setSpeechRate(0.75f);
 
        readingString = new SpannableStringBuilder();
         ((TextView) findViewById(R.id.book_display)).setText(readingString);
@@ -81,11 +84,14 @@ public class MainActivity extends AppCompatActivity {
 
     @Override
     protected void onDestroy() {
-        super.onDestroy();
-
+        /*
         if (tts != null) {
+            tts.stop();
             tts.shutdown();
         }
+        */
+
+        super.onDestroy();
     }
 
     public void readString(String string) {
@@ -155,25 +161,54 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startReading() {
-        highlightAsSpoken(wholeDigitizedText);
+        SpannableStringBuilder tempString = new SpannableStringBuilder();
+        for (List<String> paragraph : wholeDigitizedText) {
+            for (String word : paragraph) {
+                tempString.append(word);
+                tempString.append(" ");
+            }
+        }
+        readString(tempString.toString());
+
+        highlightAsSpoken(wholeDigitizedText, 150);
     }
 
-    private void highlightAsSpoken(List<List<String>> digitizedText) {
-        for(List<String> paragraph : digitizedText) {
-            for(String word : paragraph) {
-                //readString(word);
-                readingString.append(word);
-                readingString.append(" ");
-            }
-            readingString.append("\n === \n");
+    private void highlightAsSpoken(List<List<String>> digitizedText, int WPM) {
+        int currentWord = 0;
+        int wordCount = 0;
+
+        for(List<String> sentence : digitizedText) {
+            wordCount += sentence.size();
         }
 
-        this.runOnUiThread(new Runnable() {
-            @Override
-            public void run() {
-                ((TextView) findViewById(R.id.book_display)).setText(readingString.toString());
-                readString(readingString.toString());
+        while(currentWord <= wordCount) {
+            readingString = new SpannableStringBuilder();
+            int anotherCounter = 0;
+            for (List<String> paragraph : digitizedText) {
+                for (String word : paragraph) {
+                    if(anotherCounter == currentWord) {
+                        readingString.append("<b>");
+                        readingString.append(word);
+                        readingString.append("</b>");
+                        readingString.append(" ");
+                    } else {
+                        readingString.append(word);
+                        readingString.append(" ");
+                    }
+                    anotherCounter++;
+                }
+                readingString.append("\n \n \n");
             }
-        });
+
+            this.runOnUiThread(new Runnable() {
+                @Override
+                public void run() {
+                    ((TextView) findViewById(R.id.book_display)).setText(Html.fromHtml(readingString.toString()));
+                }
+            });
+
+            SystemClock.sleep(60000/WPM);
+            currentWord++;
+        }
     }
 }
