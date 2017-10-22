@@ -70,6 +70,15 @@ public class MainActivity extends AppCompatActivity {
         ((TextView) findViewById(R.id.book_display)).setText(readingString);
     }
 
+    @Override
+    protected void onStop() {
+        super.onStop();
+        /*
+        if (tts != null)
+            tts.shutdown();
+            */
+    }
+
     public void readString(String string) {
         tts.speak(string, TextToSpeech.QUEUE_ADD, null, UUID.randomUUID().toString());
     }
@@ -146,9 +155,16 @@ public class MainActivity extends AppCompatActivity {
             for(String word : paragraph) {
                 readString(word);
                 readingString.append(word);
+                readingString.append(" ");
             }
+            readingString.append("\n");
         }
 
-        ((TextView) findViewById(R.id.book_display)).setText(readingString.toString());
+        this.runOnUiThread(new Runnable() {
+            @Override
+            public void run() {
+                ((TextView) findViewById(R.id.book_display)).setText(readingString.toString());
+            }
+        });
     }
 }
