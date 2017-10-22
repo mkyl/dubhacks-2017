@@ -30,8 +30,13 @@ import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.UUID;
 
 import static android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION;
@@ -43,9 +48,11 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     File tempFile;
     TextToSpeech tts;
+    String currentSentenceID = null;
 
     List<List<String>> wholeDigitizedText;
     SpannableStringBuilder readingString;
+    Map<String, String> speakingTokenToSentence;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -68,10 +75,16 @@ public class MainActivity extends AppCompatActivity {
         tts = new TextToSpeech(getApplicationContext(), new TextToSpeech.OnInitListener() {
             @Override
             public void onInit(int status) {
-                Log.e("TTS", "TextToSpeech.OnInitListener.onInit...");
+                Log.i("TTS", "TextToSpeech.OnInitListener.onInit...");
             }
         });
 
+        tts.setOnUtteranceCompletedListener(new TextToSpeech.OnUtteranceCompletedListener() {
+            @Override
+            public void onUtteranceCompleted(String utteranceId) {
+                MainActivity.this.currentSentenceID = utteranceId;
+            }
+        });
         tts.setSpeechRate(0.75f);
 
        readingString = new SpannableStringBuilder();
@@ -94,8 +107,8 @@ public class MainActivity extends AppCompatActivity {
         super.onDestroy();
     }
 
-    public void readString(String string) {
-        tts.speak(string, TextToSpeech.QUEUE_ADD, null, UUID.randomUUID().toString());
+    public void readString(String string, String id) {
+        tts.speak(string, TextToSpeech.QUEUE_ADD, null, id);
     }
 
     @Override
@@ -161,6 +174,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void startReading() {
+        this.speakingTokenToSentence = new HashMap<>();
         SpannableStringBuilder tempString = new SpannableStringBuilder();
         for (List<String> paragraph : wholeDigitizedText) {
             for (String word : paragraph) {
@@ -168,9 +182,36 @@ public class MainActivity extends AppCompatActivity {
                 tempString.append(" ");
             }
         }
-        readString(tempString.toString());
+
+        String[] sentences = tempString.toString().split("\\.");
+        for (String sentence : sentences) {
+            String sentenceID =   UUID.randomUUID().toString();
+            speakingTokenToSentence.put(sentenceID, sentence);
+            readString(sentence, sentenceID);
+        }
 
         highlightAsSpoken(wholeDigitizedText, 150);
+    }
+
+    private int indexOfStartOfSentence(String sentence, List<List<String>> digitizedText) {
+        if (sentence != null) {
+            sentence = sentence.trim();
+            if (sentence.equals(""))
+                return 0;
+        }
+
+        Log.i("ReadingAid", "Trying to find sentence: " + sentence);
+        List<String> wordsInTheWhole = new ArrayList<>();
+        for(List<String> searchedSentence : digitizedText) {
+            wordsInTheWhole.addAll(searchedSentence);
+        }
+
+        List<String> processedSentence = new ArrayList<>(Arrays.asList(sentence.split(" ")));
+        processedSentence.remove(processedSentence.size() - 1);
+
+        Log.i("ReadingAid", "new sentence, starting at:" + Collections.indexOfSubList(wordsInTheWhole, processedSentence) + processedSentence.size() + 1);
+
+        return Collections.indexOfSubList(wordsInTheWhole, processedSentence) + processedSentence.size() + 1;
     }
 
     private void highlightAsSpoken(List<List<String>> digitizedText, int WPM) {
@@ -186,6 +227,13 @@ public class MainActivity extends AppCompatActivity {
             int anotherCounter = 0;
             for (List<String> paragraph : digitizedText) {
                 for (String word : paragraph) {
+                    if(currentSentenceID != null) {
+                        String currentSpokenSentence = speakingTokenToSentence.get(currentSentenceID);
+                        Log.i("ReadingAid", "currently saying: " + currentSpokenSentence);
+                        currentWord = indexOfStartOfSentence(currentSpokenSentence, digitizedText);
+                        currentSentenceID = null;
+                    }
+
                     if(anotherCounter == currentWord) {
                         readingString.append("<b>");
                         readingString.append(word);
