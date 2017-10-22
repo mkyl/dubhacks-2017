@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.TextView;
+import android.graphics.Typeface;
 
 import org.json.JSONObject;
 
@@ -52,6 +53,9 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Toolbar toolbar = (Toolbar) findViewById(R.id.toolbar);
         setSupportActionBar(toolbar);
+        Typeface type = Typeface.createFromAsset(getAssets(), "fonts/CormorantGaramond-Light.ttf");
+        TextView tf = (TextView) findViewById(R.id.book_display);
+        tf.setTypeface(type);
 
         FloatingActionButton fab = (FloatingActionButton) findViewById(R.id.fab);
         fab.setOnClickListener(new View.OnClickListener() {
@@ -72,6 +76,7 @@ public class MainActivity extends AppCompatActivity {
 
        readingString = new SpannableStringBuilder();
         ((TextView) findViewById(R.id.book_display)).setText(readingString);
+
 
         StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
         StrictMode.setVmPolicy(builder.build());
