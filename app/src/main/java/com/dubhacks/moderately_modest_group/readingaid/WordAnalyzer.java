@@ -14,6 +14,8 @@ import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.PriorityQueue;
+import java.util.Queue;
 
 /**
  * Created by Robert on 10/22/2017.
@@ -45,5 +47,26 @@ public class WordAnalyzer {
         }
 
         return wordDifficulties;
+    }
+
+
+    public static Map<String, String> getNWords(List<List<String>> words,
+                                               Map<String, Double> wordDifficulties, int numberOfWords) {
+        Queue<Word> pq = new PriorityQueue<>();
+
+        for (List<String> wordsList : words) {
+            for (String word : wordsList) {
+                pq.add(new Word(word, wordDifficulties.get(word)));
+            }
+        }
+
+        Map<String, String> definitions = new HashMap<>();
+
+        for (int i = 0; i < numberOfWords; i++) {
+            String word = pq.remove().word;
+            definitions.put(word, "some definition of word " + word);
+        }
+
+        return definitions;
     }
 }
