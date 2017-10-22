@@ -19,6 +19,8 @@ import android.view.MenuItem;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.RandomAccessFile;
+import java.nio.file.Files;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -86,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
     private void dispatchTakePictureIntent() {
         Intent takePictureIntent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
         tempFile = new File(getExternalCacheDir(), "digitize-me.jpg");
-        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, tempFile);
+        takePictureIntent.putExtra(MediaStore.EXTRA_OUTPUT, Uri.fromFile(tempFile));
 
         if (takePictureIntent.resolveActivity(getPackageManager()) != null) {
             startActivityForResult(takePictureIntent, REQUEST_IMAGE_CAPTURE);
@@ -96,7 +98,26 @@ public class MainActivity extends AppCompatActivity {
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         if (requestCode == REQUEST_IMAGE_CAPTURE && resultCode == RESULT_OK) {
-            Log.i(TAG, "Image capture success. Saved to: " + tempFile.getAbsoluteFile());
+            Log.i(TAG, "Image capture success. Saved?: " + tempFile.exists());
+
+            try {
+                RandomAccessFile f = new RandomAccessFile(tempFile, "r");
+                final byte[] b = new byte[(int)tempFile.length()];
+                f.readFully(b);
+                new Thread() {
+                    public void run() {
+                        try {
+                            Log.i(TAG, "" + DigitizeText.digitizeText(b).toString(4));
+                        } catch (Exception e) {
+                            Log.i(TAG, "" + e);
+                        }
+                    }
+                }.start();
+            } catch (Exception e) {
+                Log.e(TAG, "something bad happened: " + e);
+            }
+
+
         } else {
             Log.i(TAG, "No, " + resultCode);
         }
