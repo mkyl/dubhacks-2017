@@ -197,7 +197,7 @@ public class MainActivity extends AppCompatActivity {
         if (sentence != null) {
             sentence = sentence.trim();
             if (sentence.equals(""))
-                return 0;
+                return -1;
         }
 
         Log.i("ReadingAid", "Trying to find sentence: " + sentence);
@@ -232,6 +232,9 @@ public class MainActivity extends AppCompatActivity {
                         Log.i("ReadingAid", "currently saying: " + currentSpokenSentence);
                         currentWord = indexOfStartOfSentence(currentSpokenSentence, digitizedText);
                         currentSentenceID = null;
+
+                        if (currentWord == -1)
+                            return;
                     }
 
                     if(anotherCounter == currentWord) {
