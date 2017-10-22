@@ -5,6 +5,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Bundle;
+import android.os.StrictMode;
 import android.provider.MediaStore;
 import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
@@ -68,15 +69,18 @@ public class MainActivity extends AppCompatActivity {
 
        readingString = new SpannableStringBuilder();
         ((TextView) findViewById(R.id.book_display)).setText(readingString);
+
+        StrictMode.VmPolicy.Builder builder = new StrictMode.VmPolicy.Builder();
+        StrictMode.setVmPolicy(builder.build());
     }
 
     @Override
-    protected void onStop() {
-        super.onStop();
-        /*
-        if (tts != null)
+    protected void onDestroy() {
+        super.onDestroy();
+
+        if (tts != null) {
             tts.shutdown();
-            */
+        }
     }
 
     public void readString(String string) {
@@ -127,7 +131,6 @@ public class MainActivity extends AppCompatActivity {
                 new Thread() {
                     public void run() {
                         try {
-                            Log.i(TAG, "" + DigitizeText.digitizeText(b).toString(4));
                             JSONObject tempJOSN = DigitizeText.digitizeText(b);
                             wholeDigitizedText = DigitizeText.jsonToStringArray(tempJOSN);
                             startReading();
@@ -153,17 +156,18 @@ public class MainActivity extends AppCompatActivity {
     private void highlightAsSpoken(List<List<String>> digitizedText) {
         for(List<String> paragraph : digitizedText) {
             for(String word : paragraph) {
-                readString(word);
+                //readString(word);
                 readingString.append(word);
                 readingString.append(" ");
             }
-            readingString.append("\n");
+            readingString.append("\n === \n");
         }
 
         this.runOnUiThread(new Runnable() {
             @Override
             public void run() {
                 ((TextView) findViewById(R.id.book_display)).setText(readingString.toString());
+                readString(readingString.toString());
             }
         });
     }
