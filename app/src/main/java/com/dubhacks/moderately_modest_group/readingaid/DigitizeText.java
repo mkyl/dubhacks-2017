@@ -55,9 +55,9 @@ public class DigitizeText {
             // Format and display the JSON response.
             String jsonString = EntityUtils.toString(entity);
             JSONObject json = new JSONObject(jsonString);
-            System.out.println("REST Response:\n");
-            System.out.println(json.toString(2));
-            Log.i("ReadingAid", json.toString(4) );
+            // System.out.println("REST Response:\n");
+            // System.out.println(json.toString(2));
+            // Log.i("ReadingAid", json.toString(4) );
 
             // TODO: what to do with this?
             return json;

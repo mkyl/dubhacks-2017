@@ -10,17 +10,23 @@ import android.speech.tts.TextToSpeech;
 import android.support.design.widget.FloatingActionButton;
 import android.support.design.widget.Snackbar;
 import android.support.v4.content.FileProvider;
+import android.support.v4.widget.TextViewCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
+import android.text.SpannableStringBuilder;
 import android.util.Log;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
+import android.widget.TextView;
+
+import org.json.JSONObject;
 
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Locale;
 import java.util.UUID;
 
@@ -33,6 +39,9 @@ public class MainActivity extends AppCompatActivity {
     static final int REQUEST_IMAGE_CAPTURE = 1;
     File tempFile;
     TextToSpeech tts;
+
+    List<List<String>> wholeDigitizedText;
+    SpannableStringBuilder readingString;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -53,14 +62,16 @@ public class MainActivity extends AppCompatActivity {
             @Override
             public void onInit(int status) {
                 Log.e("TTS", "TextToSpeech.OnInitListener.onInit...");
-                MainActivity.this.readString("I like pie. Pie = 3.141");
+                // MainActivity.this.readString("I like pie. Pie = 3.141");
             }
         });
+
+       readingString = new SpannableStringBuilder();
+        ((TextView) findViewById(R.id.book_display)).setText(readingString);
     }
 
     public void readString(String string) {
-        tts.speak(string, TextToSpeech.QUEUE_FLUSH, null, UUID.randomUUID().toString());
-
+        tts.speak(string, TextToSpeech.QUEUE_ADD, null, UUID.randomUUID().toString());
     }
 
     @Override
@@ -108,6 +119,9 @@ public class MainActivity extends AppCompatActivity {
                     public void run() {
                         try {
                             Log.i(TAG, "" + DigitizeText.digitizeText(b).toString(4));
+                            JSONObject tempJOSN = DigitizeText.digitizeText(b);
+                            wholeDigitizedText = DigitizeText.jsonToStringArray(tempJOSN);
+                            startReading();
                         } catch (Exception e) {
                             Log.i(TAG, "" + e);
                         }
@@ -121,5 +135,20 @@ public class MainActivity extends AppCompatActivity {
         } else {
             Log.i(TAG, "No, " + resultCode);
         }
+    }
+
+    private void startReading() {
+        highlightAsSpoken(wholeDigitizedText);
+    }
+
+    private void highlightAsSpoken(List<List<String>> digitizedText) {
+        for(List<String> paragraph : digitizedText) {
+            for(String word : paragraph) {
+                readString(word);
+                readingString.append(word);
+            }
+        }
+
+        ((TextView) findViewById(R.id.book_display)).setText(readingString.toString());
     }
 }
